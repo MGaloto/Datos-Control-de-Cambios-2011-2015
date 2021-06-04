@@ -1,0 +1,145 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Datos Macroeconomicos del Primer Control de Cambios 2011-2015
+#
+# From: BCRA
+# --------------------------------------------------------------------------------------- #
+
+
+library(readxl)
+library(corrplot) 
+library(PerformanceAnalytics) 
+library(quantmod)
+library(highcharter)
+library(dplyr)
+library(ggplot2) 
+library(viridis)
+library(lubridate)
+library(dplyr)
+library(plotly)
+library(corrplot) 
+library(PerformanceAnalytics) 
+library(quantmod)
+library(highcharter)
+library(dplyr)
+library(plotly)
+library(viridis)
+library(hrbrthemes)
+library(tseries)
+library(PerformanceAnalytics)
+library(urca)
+library(tidyr)
+library(FactoMineR)
+
+
+# --------------------------------------------------------------------------------------- #
+
+
+primercepo=read_excel("Promedio Semana Primer Cepo.xlsx")
+
+
+setwd("C:/Users/54116/Desktop/Carpetas/Trabajos en R/Variables Financieras")
+
+
+
+# --------------------------------------------------------------------------------------- #
+
+# Variables de series de tiempo
+
+brecha = ts(primercepo$`Log Brecha`)
+
+tasa= ts(primercepo$`Tasa de Interes Ponderada`)
+
+bm= ts(primercepo$BM)
+
+reservas= ts(primercepo$Reservas)
+
+
+# Variables de series de tiempo en logaritmos
+
+
+logtasa= log(tasa)
+
+logbm= log(bm)
+
+logreservas = log(reservas)
+
+
+# Variables de series de tiempo en primeras diferencias
+
+
+dlogbrecha = diff(brecha, lag=1, differences = 1)
+
+dlogtasa= diff(logtasa, lag=1, differences = 1)
+
+dlogbm= diff(logbm, lag=1, differences = 1)
+
+dlogreservas = diff(logreservas, lag=1, differences = 1)
+
+
+# --------------------------------------------------------------------------------------- #
+
+# Graficos de series de tiempo
+
+
+plot(brecha, main="Logaritmo de la Brecha Cambiaria")
+
+plot(logtasa, main="Logaritmo de la Tasa de Interes")
+
+plot(logbm, main="Logaritmo de la Base Monetaria")
+
+plot(logreservas, main="Logaritmo de las Reservas")
+
+
+# --------------------------------------------------------------------------------------- #
+
+# Graficos de correlaciones
+
+
+muestra = ts.intersect(brecha, logtasa, logbm, logreservas)
+
+muestra = as.data.frame(muestra)
+
+chart.Correlation(muestra[1:4])
+
+
+
+# --------------------------------------------------------------------------------------- #
+
+# Analisis de Componentes Principales
+
+# Se crea el df con las variables que voy a analizar
+
+primerc = primercepo %>% select(`Dólar Paralelo Promedio` , Reservas , 
+              `PF Corto Plazo` , M1 , `Tasa de Interes Ponderada` ,
+              Brecha , BM , `Riesgo Pais`)
+
+
+pc1 = PCA(primerc, graph = FALSE)
+
+
+# Se crea un grafico de circulo de correlaciones, a menor angulo mayor correlacion positiva. Si el
+# angulo es de 90 grados no existe correlacion entre las variables. Si es de 180 grados la correlacion
+# es altamente negativa.
+
+plot(pc1, choix = "var")
+
+
+# Podemos visualizar que el componente uno capta el 77% de la variabilidad del data set,
+# ambos componentes el 91%, es significativamente alto, por lo tanto podemos utilizarlo para 
+# analizar correlaciones 
+
+# --------------------------------------------------------------------------------------- #
+
+
+
+```
